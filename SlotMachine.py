@@ -50,7 +50,7 @@ background_image_blank = pygame.image.load("temp_images/devils_delight_wallpaper
 #icon for app window
 icon = pygame.image.load('temp_images/icon.png')
 pygame.display.set_icon(icon)
-pygame.display.set_caption("Devil's Bargin")
+pygame.display.set_caption("Devil's Bargain")
 
 pygame.mixer.init()
 
@@ -60,7 +60,7 @@ pygame.mixer.music.load("slot_sounds/gravewalk.ogg")
 pygame.mixer.music.play(-1,0.0)
 pygame.mixer.music.set_volume(0.2) #between 0-1
 
-#create array to hold sounds
+#create array to hold soundsif you want to go this way
 # sounds = []
 #create the variables and assign them the sounds
 # spinSound = pygame.mixer.Sound("Sounds/slotSpinSound.ogg")
