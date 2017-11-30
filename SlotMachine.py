@@ -44,11 +44,11 @@ IMAGES_N = 11
 if IMAGES_N <> len(PROBABILTY):
    print"number of images and probability array length do not match!"
           
-background_image = pygame.image.load("temp_images/devils_delight_wallpaper_640_480.png").convert()
-background_image_blank = pygame.image.load("temp_images/devils_delight_wallpaper_640_480_blank.png").convert()
+background_image = pygame.image.load("slot_background_images/devils_delight_wallpaper_640_480.png").convert()
+background_image_blank = pygame.image.load("slot_background_images/devils_delight_wallpaper_640_480_blank.png").convert()
 
 #icon for app window
-icon = pygame.image.load('temp_images/icon.png')
+icon = pygame.image.load('slot_misc_images/icon.png')
 pygame.display.set_icon(icon)
 pygame.display.set_caption("Devil's Bargain")
 
