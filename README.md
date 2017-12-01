@@ -1,6 +1,8 @@
 # slotMachine
 python code for a probabilistic slot machine using pygame and numpy
 
+Runs using Python v2.7, Pygame v1.9
+
 Reels are rendered as sprites and "spun", the final image displayed is choosen based on a pre-defined probility distribution. 
 The probablitiy distribution can be tweeked manually using a spreadsheet program to get the desired odds.
 
