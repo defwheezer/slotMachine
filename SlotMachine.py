@@ -114,9 +114,13 @@ def load_images(path):
     Returns: List of images.
     """
     images = []
+    x = 0;
     for file_name in os.listdir(path):
         image = pygame.image.load(path + os.sep + file_name).convert()
         images.append(image)
+        #print out reel image files names and compare to name array to make sure they line up
+         print"file name: "+repr(file_name)+", array index: "+repr(x)
+        x = x+1
     return images
 
 def create_reels(imageArr):
