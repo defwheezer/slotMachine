@@ -1,4 +1,6 @@
 # slotMachine
+Modified to run on raspberry pi using I2C to control Arduino on coin acceptor/despensor and analog buttons for betting and payout.
+
 python code for a probabilistic slot machine using pygame and numpy
 
 Runs using Python v2.7, Pygame v1.9
