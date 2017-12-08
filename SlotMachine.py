@@ -7,7 +7,7 @@ import numpy as np
 
 import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BCM)
-#pin GIO 22 on arduino, pull down
+#pin GIO 22 on Pi, pull down
 GPIO.setup(22, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 pygame.init()
