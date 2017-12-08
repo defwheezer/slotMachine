@@ -5,6 +5,11 @@ import random
 from numpy.random import choice
 import numpy as np
 
+import RPi.GPIO as GPIO
+GPIO.setmode(GPIO.BCM)
+#pin GIO 22 on arduino, pull down
+GPIO.setup(22, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
 pygame.init()
 
 SIZE = WIDTH, HEIGHT = 640, 480
@@ -574,7 +579,6 @@ class AnimatedSprite(pygame.sprite.Sprite):
     def __init__(self, position, images):
         """
         Animated sprite object.
-
         Args:
             position: x, y coordinate on the screen to place the AnimatedSprite.
             images: Images to use in the animation.
@@ -642,7 +646,12 @@ def main():
    firstSpin = True #change to false after first spin
    
    while (running):
-
+      #check IO pin for button press
+      if GPIO.input(22):
+          print('Input 22 was HIGH')
+      else:
+          print('Input 22 was LOW')
+          
        screen.blit(background_image_blank, [0, 0])
 
        textSurf = b_sys_font.render("Soul Cost $1", 1, fg)
