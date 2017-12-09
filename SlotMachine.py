@@ -7,9 +7,13 @@ import numpy as np
 
 pygame.init()
 
-SIZE = WIDTH, HEIGHT = 640, 480
+SIZE = WIDTH, HEIGHT = 1000, 760
 BACKGROUND_COLOR = pygame.Color('black')
 FPS = 80
+
+spriteImageWidth = 325
+spriteImageHeight = 263
+imagePadding = 12 #padding between reel images
 
 screen = pygame.display.set_mode(SIZE)
 clock = pygame.time.Clock()
@@ -44,8 +48,8 @@ IMAGES_N = 11
 if IMAGES_N <> len(PROBABILTY):
    print"number of images and probability array length do not match!"
           
-background_image = pygame.image.load("slot_background_images/devils_delight_wallpaper_640_480.png").convert()
-background_image_blank = pygame.image.load("slot_background_images/devils_delight_wallpaper_640_480_blank.png").convert()
+background_image = pygame.image.load("slot_background_images/devils_delight_wallpaper_1000_760_v2.png").convert()
+background_image_blank = pygame.image.load("slot_background_images/devils_delight_wallpaper_1000_760_v2_blank.png").convert()
 
 #icon for app window
 icon = pygame.image.load('slot_misc_images/icon.png')
@@ -130,11 +134,11 @@ def load_images(path):
 def create_reels(imageArr):
     #create each reel from shuffled image array to look random
     #random.shuffle(imageArr)
-    reel1 = AnimatedSprite(position=(15, 10), images=imageArr)
+    reel1 = AnimatedSprite(position=(imagePadding, 10), images=imageArr)
     #random.shuffle(imageArr)
-    reel2 = AnimatedSprite(position=(225, 10), images=imageArr)
+    reel2 = AnimatedSprite(position=((spriteImageWidth)+imagePadding, 10), images=imageArr)
     #random.shuffle(imageArr)
-    reel3 = AnimatedSprite(position=(435, 10), images=imageArr)
+    reel3 = AnimatedSprite(position=((spriteImageWidth*2)+imagePadding, 10), images=imageArr)
 
     # Create sprite groups and add reels to them.
     all_spinning_sprites = pygame.sprite.Group(reel1, reel2, reel3)
@@ -181,7 +185,7 @@ def score_update(current, total, bonusNum, bonusName, bonusCat, specialCat, xspe
    catScore = bonusNum[1]
    specialScore = bonusNum[2]
    xspecialScore = bonusNum[3]
-   text_y = 180 #start text here
+   text_y = spriteImageHeight + imagePadding #start text here
    text_height = 40 #increment y by this
    
    subscoreName = a_sys_font.render("Bonus: $"+repr(nameScore)+" "+bonusName+" ", 1, fg)
@@ -341,7 +345,7 @@ def pull_handle(images, spinning_3_sprites,spinning_2_sprites,spinning_1_sprites
               reel2_static = True
            spinning_2_sprites.update(spins,USEREVENT+1)
            spinning_2_sprites.draw(screen)
-           screen.blit(images[final_reel1], (15,10))
+           screen.blit(images[final_reel1], (imagePadding,10))
            
         elif spin3:
            #print"only 3 true!"
@@ -353,17 +357,17 @@ def pull_handle(images, spinning_3_sprites,spinning_2_sprites,spinning_1_sprites
               reel3_static = True
            spinning_1_sprites.update(spins,USEREVENT+1)
            spinning_1_sprites.draw(screen)
-           screen.blit(images[final_reel1], (15,10))
-           screen.blit(images[final_reel2], (225,10))
+           screen.blit(images[final_reel1], (imagePadding,10))
+           screen.blit(images[final_reel2], (spriteImageWidth+imagePadding,10))
            
         else:
            print"Game over!"
            reelSpin3.stop()
            reelImageSounds[final_reel2].stop()
            reelImageSounds[final_reel3].play()
-           screen.blit(images[final_reel1], (15,10))
-           screen.blit(images[final_reel2], (225,10))
-           screen.blit(images[final_reel3], (435,10))        
+           screen.blit(images[final_reel1], (imagePadding,10))
+           screen.blit(images[final_reel2], (spriteImageWidth+imagePadding,10))
+           screen.blit(images[final_reel3], ((spriteImageWidth*2)+imagePadding,10))        
            running = False
            
         #all_sprites.update(dt,USEREVENT+1)  # Calls the 'update' method on all sprites in the list.
@@ -374,16 +378,16 @@ def pull_handle(images, spinning_3_sprites,spinning_2_sprites,spinning_1_sprites
         pygame.event.pump()
 
 def redraw_static_reels(images, final_reel1, final_reel2, final_reel3):
-    screen.blit(images[final_reel1], (15,10))
-    screen.blit(images[final_reel2], (225,10))
-    screen.blit(images[final_reel3], (435,10))
+    screen.blit(images[final_reel1], (imagePadding,10))
+    screen.blit(images[final_reel2], (spriteImageWidth+imagePadding,10))
+    screen.blit(images[final_reel3], ((spriteImageWidth*2)+imagePadding,10))
     pygame.display.update()
 
 def run_game(bank, cost):
 
        #load the reel images
        #Make sure to provide the relative or full path to the images directory.
-       reelImages = load_images(path='slot_images')
+       reelImages = load_images(path='slot_images_lg')
 
        #polulate the names of each image and the catagory into name_decoder, catagory_decoder arrays
        name_decoder, catagory_decoder = populate_names_cats()
@@ -574,14 +578,13 @@ class AnimatedSprite(pygame.sprite.Sprite):
     def __init__(self, position, images):
         """
         Animated sprite object.
-
         Args:
             position: x, y coordinate on the screen to place the AnimatedSprite.
             images: Images to use in the animation.
         """
         super(AnimatedSprite, self).__init__()
 
-        size = (185, 150)  # This should match the size of the images.
+        size = (spriteImageWidth, spriteImageHeight)  # This should match the size of the images.
 
         self.rect = pygame.Rect(position, size)
         self.images = images
