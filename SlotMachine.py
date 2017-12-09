@@ -6,6 +6,7 @@ from numpy.random import choice
 import numpy as np
 
 pygame.init()
+pygame.mouse.set_visible(False)
 
 SIZE = WIDTH, HEIGHT = 1000, 760
 BACKGROUND_COLOR = pygame.Color('black')
