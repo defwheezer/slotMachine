@@ -100,10 +100,16 @@ win4_sound = pygame.mixer.Sound('slot_sounds/win_moo.ogg')
 lose_sound = pygame.mixer.Sound('slot_sounds/error.ogg')
 noPoints_sound = pygame.mixer.Sound('slot_sounds/sigh.ogg')
 
+# name_decoder- array of image names based on index position in 'images' array
+name_decoder = ["Dice", "Hex", "666", "Demon", "Devil Girl",
+                    "Satan", "Tomestone Q", "Tomestone K", "Tomestone A", "Evil Cow", "God Cow"]
+catagory_decoder = ["Satanic", "Satanic", "Satanic", "Demon", "Demon", "Demon", "Grave", "Grave", "Grave",
+                     "Special", "xSpecial"]
+
+reelImages = []
+
 #set up event clock(s)
 pygame.time.set_timer(USEREVENT+1, 50)
-
-
 
 def timerFunc(index):
        index_old = index
@@ -151,15 +157,6 @@ def choose_final_images(n, probability):
     #use probabilities to choose 3 random images
     imageIndexs = np.random.choice(n, 3, p=probability)
     return imageIndexs
-
-def populate_names_cats():
-    # name_decoder- array of image names based on index position in 'images' array
-    name = ["Dice", "Hex", "666", "Demon", "Devil Girl",
-                    "Satan", "Tomestone Q", "Tomestone K", "Tomestone A", "Evil Cow", "God Cow"]
-    catagory = ["Satanic", "Satanic", "Satanic", "Demon", "Demon", "Demon", "Grave", "Grave", "Grave",
-                     "Special", "xSpecial"]
-    #print"len(name_decoder): "+repr(len(name_decoder))
-    return (name, catagory)
 
 def check_input():
     for event in pygame.event.get():
@@ -383,18 +380,10 @@ def redraw_static_reels(images, final_reel1, final_reel2, final_reel3):
     screen.blit(images[final_reel3], ((spriteImageWidth*2)+imagePadding,10))
     pygame.display.update()
 
-def run_game(bank, cost):
-
-       #load the reel images
-       #Make sure to provide the relative or full path to the images directory.
-       reelImages = load_images(path='slot_images_lg')
-
-       #polulate the names of each image and the catagory into name_decoder, catagory_decoder arrays
-       name_decoder, catagory_decoder = populate_names_cats()
+def run_game(bank, cost, reelImages):
 
        #create the 3 reels and animate to spin 1, 2, or 3
        spinning_3_sprites,spinning_2_sprites,spinning_1_sprites = create_reels(reelImages)
-
        #choose final reel image
        imageIndexs = choose_final_images(IMAGES_N, PROBABILTY1)
        final_reel1 = imageIndexs[0]
@@ -430,7 +419,7 @@ def run_game(bank, cost):
        
        pull_handle(reelImages, spinning_3_sprites,spinning_2_sprites,spinning_1_sprites, final_reel1, final_reel2, final_reel3)
 
-       # puase after reels have all stopped
+       # pause after reels have all stopped
        pygame.time.wait(1000)
 
        #display and calculate score
@@ -626,6 +615,9 @@ def main():
    cost_pull = 1.00 #cost per pull
    repullMultiplier = 0.25 #mult bank if repull before cashout
    running = True
+   #load the reel images
+   #Make sure to provide the relative or full path to the images directory.
+   reelImages = load_images(path='slot_images_lg')
    #draw intro screen
    
 ##   textSurf = b_sys_font.render("Soul Cost $1", 1, fg)
@@ -714,7 +706,7 @@ def main():
                    firstSpin = False
                    screen.blit(background_image, [0, 0])
                    pygame.display.update()
-                   bank = run_game(bank, cost_pull)
+                   bank = run_game(bank, cost_pull, reelImages)
                    screen.blit(background_image, [0, 0])
                    draw_player_data(bank)
                    if bank < cost_pull:
