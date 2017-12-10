@@ -28,11 +28,11 @@ size = font.size(text)
 fg = 250, 250, 250 #font color
 bg = 5, 5, 5
    
-a_sys_font = pygame.font.SysFont("Arial", 30)
-b_sys_font = pygame.font.SysFont("Arial", 40)
-c_sys_font = pygame.font.SysFont("Arial", 60)
-d_sys_font = pygame.font.SysFont("Arial", 25)
-e_sys_font = pygame.font.SysFont("Arial", 10)
+a_sys_font = pygame.font.SysFont("Arial", 40)
+b_sys_font = pygame.font.SysFont("Arial", 50)
+c_sys_font = pygame.font.SysFont("Arial", 90)
+d_sys_font = pygame.font.SysFont("Arial", 35)
+e_sys_font = pygame.font.SysFont("Arial", 20)
 
 #table for probablities for selecting final reel image
 #weighted towards hex and demons
