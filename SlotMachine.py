@@ -37,9 +37,9 @@ e_sys_font = pygame.font.SysFont("Arial", 10)
 #table for probablities for selecting final reel image
 #weighted towards hex and demons
 #each reel gets a different probability
-PROBABILTY1=[0.04,0.3,0.07,0.11,0.1,0.13,0.04,0.04,0.04,0.06,0.07]
-PROBABILTY2=[0.08,0.25,0.03,0.12,0.1,0.15,0.02,0.02,0.02,0.05,0.16]
-PROBABILTY3=[0.1,0.25,0.1,0.08,0.03,0.005,0.105,0.07,0.05,0.05,0.16]
+PROBABILTY1=[0.05,0.31,0.07,0.14,0.17,0.16,0.01,0.01,0.01,0.06,0.01]
+PROBABILTY2=[0.01,0.2,0.01,0.21,0.2,0.21,0.01,0.01,0.01,0.06,0.07]
+PROBABILTY3=[0.21,0.05,0.21,0.09,0.05,0.02,0.11,0.02,0.06,0.06,0.12]
 
 #set normal probability to start
 PROBABILTY = PROBABILTY1
