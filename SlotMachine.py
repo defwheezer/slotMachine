@@ -2,8 +2,22 @@ import os
 import pygame
 from pygame.locals import *
 import random
+import time
 from numpy.random import choice
 import numpy as np
+#only if using raspberry pi
+#import smbus
+#import RPi.GPIO as GPIO
+
+#GPIO.setmode(GPIO.BCM)
+#GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+#GPIO.setup(22, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+#For RPI version 1, use "bus = smbus.SMBus(0)"
+#Sbus = smbus.SMBus(1)
+
+# This is the address we setup in the Arduino Program
+#address = 0x08
 
 pygame.init()
 pygame.mouse.set_visible(False)
@@ -26,20 +40,26 @@ text = 'Fonty'
 size = font.size(text)
 
 fg = 250, 250, 250 #font color
+fgGreen = 0, 250, 0 #green font color
+fgRed = 250, 0, 0 #red font color
 bg = 5, 5, 5
    
-a_sys_font = pygame.font.SysFont("Arial", 40)
-b_sys_font = pygame.font.SysFont("Arial", 50)
+scores_sys_font = pygame.font.Font("slot_fonts/Something Strange.ttf", 40)
+scoreFinal_sys_font = pygame.font.Font("slot_fonts/Something Strange.ttf", 50)
+cost_sys_font = pygame.font.SysFont("Arial", 50)
+play_sys_font = pygame.font.Font("slot_fonts/Seaside.ttf", 50)
+cashOut_sys_font = pygame.font.Font("slot_fonts/FFF_Tusj.ttf", 40)
+bank_sys_font = pygame.font.Font("slot_fonts/StripesCaps.ttf", 55)
 c_sys_font = pygame.font.SysFont("Arial", 90)
-d_sys_font = pygame.font.SysFont("Arial", 35)
+d_sys_font = pygame.font.SysFont("Arial", 25)
 e_sys_font = pygame.font.SysFont("Arial", 20)
 
 #table for probablities for selecting final reel image
 #weighted towards hex and demons
 #each reel gets a different probability
-PROBABILTY1=[0.05,0.31,0.07,0.14,0.17,0.16,0.01,0.01,0.01,0.06,0.01]
-PROBABILTY2=[0.01,0.2,0.01,0.21,0.2,0.21,0.01,0.01,0.01,0.06,0.07]
-PROBABILTY3=[0.21,0.05,0.21,0.09,0.05,0.02,0.11,0.02,0.06,0.06,0.12]
+PROBABILTY1=[0.05,0.2,0.07,0.24,0.21,0.12,0.01,0.01,0.01,0.06,0.02]
+PROBABILTY2=[0.01,0.35,0.01,0.21,0.19,0.11,0.01,0.01,0.01,0.06,0.03]
+PROBABILTY3=[0.11,0.2,0.15,0.19,0.1,0.03,0.07,0.04,0.03,0.06,0.02]
 
 #set normal probability to start
 PROBABILTY = PROBABILTY1
@@ -60,7 +80,8 @@ pygame.display.set_caption("Devil's Bargain")
 pygame.mixer.init()
 
 #create background music for the game
-pygame.mixer.music.load("slot_sounds/gravewalk.ogg")
+pygame.mixer.music.load("slot_sounds/bgSlotMusic.ogg")
+#pygame.mixer.music.load("slot_sounds/gravewalk.ogg")
 #loop the sound file continuously starting at 0.0
 pygame.mixer.music.play(-1,0.0)
 pygame.mixer.music.set_volume(0.2) #between 0-1
@@ -100,6 +121,7 @@ win3_sound = pygame.mixer.Sound('slot_sounds/win3.ogg')
 win4_sound = pygame.mixer.Sound('slot_sounds/win_moo.ogg')
 lose_sound = pygame.mixer.Sound('slot_sounds/error.ogg')
 noPoints_sound = pygame.mixer.Sound('slot_sounds/sigh.ogg')
+lever_sound = pygame.mixer.Sound('slot_sounds/slot_lever.ogg')
 
 # name_decoder- array of image names based on index position in 'images' array
 name_decoder = ["Dice", "Hex", "666", "Demon", "Devil Girl",
@@ -112,6 +134,15 @@ reelImages = []
 #set up event clock(s)
 pygame.time.set_timer(USEREVENT+1, 50)
 
+#I2C read and write
+##def writeNumber(value):
+##    bus.write_byte(address, value) #number of coins to pay out
+##    return -1
+##
+##def readNumber():
+##    number = bus.read_byte(address) #number of coins added
+##    return number
+   
 def timerFunc(index):
        index_old = index
        index = index+1
@@ -169,81 +200,88 @@ def check_input():
     return index
 
 def draw_player_data(bank):
-   textSurf = a_sys_font.render("Player Soul Bank: $"+("{:.2f}".format(bank)), 1, fg)
+   textSurf = bank_sys_font.render(" Bank "+(repr(bank))+" ", 1, fg, bg)
    textRect = textSurf.get_rect()
-   textRect.center = (10, HEIGHT-40)
+   textRect.center = (WIDTH/8, HEIGHT-55)
    screen.blit(textSurf, textRect)
 
-def score_update(current, total, bonusNum, bonusName, bonusCat, specialCat, xspecialCat):
+def score_update(current, total, bonusNum, bonusName, bonusCat, specialCat, xspecialCat, bet):
 
    print"length of bonusNum: "+repr(len(bonusNum))
    print"bonusName: "+bonusName
    print"bonusCat: "+bonusCat
+   print"bet: "+repr(bet)
    nameScore = bonusNum[0]
    catScore = bonusNum[1]
    specialScore = bonusNum[2]
    xspecialScore = bonusNum[3]
    text_y = spriteImageHeight + imagePadding #start text here
-   text_height = 40 #increment y by this
+   text_height = 50 #increment y by this
    
-   subscoreName = a_sys_font.render("Bonus: $"+repr(nameScore)+" "+bonusName+" ", 1, fg)
+   subscore_cat = scores_sys_font.render("Bet: "+repr(bet), 1, fg)
+   screen.blit(subscore_cat, (5, text_y))
+   pygame.display.update()
+   pygame.time.wait(100)
+   text_y = text_y + text_height
+
+   subscoreName = scores_sys_font.render("Bonus: "+repr(nameScore)+" "+bonusName+" ", 1, fg)
    screen.blit(subscoreName, (5, text_y))
    pygame.display.update()
    if bonusName > 0:
       win1_sound.play()
-   pygame.time.wait(500)
+   pygame.time.wait(200)
    text_y = text_y + text_height
 
-   subscore_cat = a_sys_font.render("Multiplier: X"+repr(catScore), 1, fg)
+   subscore_cat = scores_sys_font.render("Bet Multiplier: X"+repr(bet), 1, fg)
    screen.blit(subscore_cat, (5, text_y))
    pygame.display.update()
    if catScore > 0:
       win1_sound.play()
-   pygame.time.wait(500)
+   pygame.time.wait(400)
    text_y = text_y + text_height
    
-   subscore_total = a_sys_font.render("**Sub Total: $"+repr(catScore*nameScore)+"**", 1, fg)
+   subscore_total = scores_sys_font.render("**Sub Total: "+repr(bet*nameScore)+"**", 1, fg)
    screen.blit(subscore_total, (5, text_y))
    pygame.display.update()
    if catScore*nameScore > 0:
       win1_sound.play()
    else:
       lose_sound.play()
-   pygame.time.wait(800)
-   text_y = text_y + text_height + 5
+   pygame.time.wait(600)
+   text_y = text_y + text_height + 10
 
    if specialScore > 0:
-      subscore_special = a_sys_font.render("Add Special: $"+repr(specialScore)+" "+specialCat+" ", 1, fg)
+      subscore_special = scores_sys_font.render("Add Special: "+repr(specialScore)+" "+specialCat+" ", 1, fg)
       screen.blit(subscore_special, (5, text_y))
       pygame.display.update()
       text_y = text_y + text_height
       win2_sound.play()
       pygame.time.wait(500)
    else:
-      text_y = text_y
+      text_y = text_y + 10
    
    if xspecialScore <> 0:
-      subscore_xspecial = a_sys_font.render("Wrath of God: $"+repr(xspecialScore)+" "+xspecialCat+" ", 1, fg)
+      subscore_xspecial = scores_sys_font.render("Wrath of God: "+repr(xspecialScore)+" "+xspecialCat+" ", 1, fg)
       screen.blit(subscore_xspecial, (5, text_y))
       pygame.display.update()
       win4_sound.play()
       text_y = text_y + text_height + 4
       pygame.time.wait(500)
    else:
-      text_y = text_y + 4 
+      text_y = text_y + 10 
    
-   pygame.draw.lines(screen, fg, False, [(5, text_y), (300,text_y)], 3)
+   pygame.draw.lines(screen, fg, False, [(5, text_y), (500,text_y)], 3)
    pygame.time.wait(500)
    #text_y = text_y + text_height
    
-   ren1 = a_sys_font.render("Current Score: $"+repr(current), 1, fg)
+   ren1 = scoreFinal_sys_font.render("Current Score: "+repr(current), 1, fg)
    screen.blit(ren1, (5, text_y))
    pygame.display.update()
    if current > 0:
       win3_sound.play()
    else:
       noPoints_sound.play()
-   pygame.time.wait(1200)
+   pygame.time.wait(1500)
 
    #redraw backround to clear previous text   
    screen.blit(background_image, [0, 0])
@@ -381,7 +419,7 @@ def redraw_static_reels(images, final_reel1, final_reel2, final_reel3):
     screen.blit(images[final_reel3], ((spriteImageWidth*2)+imagePadding,10))
     pygame.display.update()
 
-def run_game(bank, cost, reelImages):
+def run_game(bank, cost, reelImages,currentbet):
 
        #create the 3 reels and animate to spin 1, 2, or 3
        spinning_3_sprites,spinning_2_sprites,spinning_1_sprites = create_reels(reelImages)
@@ -526,7 +564,7 @@ def run_game(bank, cost, reelImages):
  
        scoreCat  = 1
        
-       finalScore = (scoreName * scoreCat) + score_special + score_xspecial
+       finalScore = (scoreName * scoreCat*currentbet) + score_special + score_xspecial
        
        if finalScore == 0:
           lose_sound.play()
@@ -550,7 +588,7 @@ def run_game(bank, cost, reelImages):
 
        bonusNums = [scoreName, scoreCat, score_special, score_xspecial]
 
-       score_update(finalScore, bank, bonusNums, bonusName, bonusCat, specialCat, xspecialCat)
+       score_update(finalScore, bank, bonusNums, bonusName, bonusCat, specialCat, xspecialCat, currentbet)
 
        redraw_static_reels(reelImages, final_reel1, final_reel2, final_reel3)
 
@@ -606,14 +644,19 @@ class AnimatedSprite(pygame.sprite.Sprite):
     def update(self, counter, USEREVENT):
         self.update_event_dependent(counter)
 
+def button_press(pin):
+      print(str(pin) + ' button pressed')
+      time.wait(200)
+  
         
 def main():
 
    #reset scores
    print"reset scores...."
-   finalScore = 0.00 #current reels
-   bank = 1.00 #total bank, start with 0
-   cost_pull = 1.00 #cost per pull
+   finalScore = 0 #current reels
+   bank = 1 #total bank, start with 0
+   cost_pull = 1 #cost per pull (1-4)
+   minBet = 1 #minimum bet allowed to play
    repullMultiplier = 0.25 #mult bank if repull before cashout
    running = True
    #load the reel images
@@ -621,7 +664,7 @@ def main():
    reelImages = load_images(path='slot_images_lg')
    #draw intro screen
    
-##   textSurf = b_sys_font.render("Soul Cost $1", 1, fg)
+##   textSurf = b_sys_font.render("Soul Cost 1", 1, fg)
 ##   textRect = textSurf.get_rect()
 ##   textRect.center = ((WIDTH/2),(HEIGHT/5))
 ##   screen.blit(textSurf, textRect)
@@ -634,50 +677,114 @@ def main():
 ##   screen.blit(textSurf, textRect)
 
    pygame.display.update()
-
+   mybet = 0 # amt bet
    firstSpin = True #change to false after first spin
    
    while (running):
+##only if using raspberry pi
+       #only if using raspberry pi
+##       input_state = GPIO.input(22)
+##       if input_state == False:
+##          button_press(22)
+##          print"Key hit: quit"
+##          try:
+##             writeNumber(int(bank)) #payout money
+##          except:
+##             print"IO write error"
+##          print"Payout: "+repr(bank)
+##          #running = False
+##          #pygame.quit()
+##          bank = 0
+##       input_state = GPIO.input(27)
+##       if input_state == False:
+##          button_press(27)
+##          print"bank: "+repr(bank)
+##          print"Key hit: 'green button', so spin again!"
+##          #win1_sound.play()
+##          lever_sound.play()
+##          if bank <= 0:
+##             print"Soul Bank empty, Add More Money!"
+##
+##          firstSpin = False
+##          screen.blit(background_image, [0, 0])
+##          pygame.display.update()
+##
+##          mybet = 0
+##          if bank <= 4 :
+##              if bank >= 1:
+##                  mybet = bank #for now, bet it all!
+##                  cost_pull = mybet
+##              else:
+##                 cost_pull = 1
+##                 mybet = 1
+##          elif bank > 4:
+##             mybet = 4
+##             cost_pull = mybet
+##             
+##          if bank <= 0:
+##            print"Add more money!"
+##            #fill background
+##            screen.fill(BACKGROUND_COLOR)
+##            textSurf = c_sys_font.render("Add More Money!", 1, fg)
+##            textRect = textSurf.get_rect()
+##            textRect.center = ((WIDTH/2),(HEIGHT/3))
+##            screen.blit(textSurf, textRect)
+##            pygame.display.update()
+##            bank = 0 #reset score in case it is negative
+##            pygame.time.wait(1000)
+##            #pygame.quit()
+##          else:
+##            bank = run_game(bank, cost_pull,reelImages,mybet)
+##            screen.blit(background_image, [0, 0])
+##            draw_player_data(bank)
+##             
+##          if bank < minBet:
+##            print"GAME OVER!"
+##            #fill background
+##            screen.fill(BACKGROUND_COLOR)
+##            textSurf = c_sys_font.render("GAME OVER!", 1, fg)
+##            textRect = textSurf.get_rect()
+##            textRect.center = ((WIDTH/2),(HEIGHT/3))
+##            screen.blit(textSurf, textRect)
+##            pygame.display.update()
+##            bank = 0 #reset score in case it is negative
+##            pygame.time.wait(1000)
+##            #pygame.quit()
 
        screen.blit(background_image_blank, [0, 0])
 
-       textSurf = b_sys_font.render("Soul Cost $1", 1, fg)
+       textSurf = cost_sys_font.render("Cost to Play: 1-4 Quarters", 1, fg)
        textRect = textSurf.get_rect()
        textRect.center = ((WIDTH/2),(HEIGHT/6))
        screen.blit(textSurf, textRect)
        
-       textSurf = b_sys_font.render("Press Down Arrow To Sell Soul", 1, fg)
+       textSurf = play_sys_font.render("Press 'GREEN Button' To PLAY", 1, fgGreen)
+       textRect = textSurf.get_rect()
+       textRect.center = ((WIDTH/2),(HEIGHT/3.5))
+       screen.blit(textSurf, textRect)
+
+       textSurf = cashOut_sys_font.render("Press 'RED Button' To CASH OUT", 1, fgRed)
        textRect = textSurf.get_rect()
        textRect.center = ((WIDTH/2),(HEIGHT/2.5))
        screen.blit(textSurf, textRect)
-
+       
        draw_player_data(bank) #update the running data like total bank
 
-       #pygame.display.update()
-
        bribe = 0
+       adjBribe = 0
        
-       if firstSpin == False:
-          if bank > 2:
-             bribe = bank*repullMultiplier
-             if bribe > 2:
-                adjBribe = 2
-                textSurf = e_sys_font.render("* Up to $2 Maximum", 1, fg, bg)
-                textRect = textSurf.get_rect()
-                textRect.center = ((WIDTH/2),(HEIGHT/(3)))
-                screen.blit(textSurf, textRect)
-             else:
-                adjBribe = bribe
-             textSurf = d_sys_font.render("Devil's Bargain*: Soul Bank"
-                                          +" X "
-                                          +"{:.2f}".format(repullMultiplier)
-                                          +" = $"
-                                          +"{:.2f}".format(adjBribe)
-                                          +" bribe to spin again", 1, fg, bg)
-             textRect = textSurf.get_rect()
-             textRect.center = ((WIDTH/2),(HEIGHT/(4)))
-             screen.blit(textSurf, textRect)
-      
+##only if using raspberry pi
+##       try:
+##        coinIn = readNumber()
+##        if coinIn != 0 & coinIn != 13:
+##           print "Arduino: Quarters added: ", coinIn
+##           print # skip a line        print "
+##           bank = bank + coinIn
+##           win1_sound.play()
+##           coinIn = 0
+##       except:
+##           print"IO read error"
+
        for event in pygame.event.get():
            if event.type == pygame.QUIT:
                print"You QUIT"
@@ -693,21 +800,10 @@ def main():
                    print"Key hit: 'down key', so spin again!"
                    if bank <= 0:
                       bank = 1
-                  # double bank for repeat pull!
-                   if bank > 1:
-                      if bribe > 2:
-                         adjBribe = 2
-                         textSurf = d_sys_font.render("* Up to $2 Maximum", 1, fg, bg)
-                         textRect = textSurf.get_rect()
-                         textRect.center = ((WIDTH/2),(HEIGHT/(3)))
-                         screen.blit(textSurf, textRect)
-                   else:
-                      adjBribe = bribe
-                   bank = bank + adjBribe
                    firstSpin = False
                    screen.blit(background_image, [0, 0])
                    pygame.display.update()
-                   bank = run_game(bank, cost_pull, reelImages)
+                   bank = run_game(bank, cost_pull,reelImages,mybet)
                    screen.blit(background_image, [0, 0])
                    draw_player_data(bank)
                    if bank < cost_pull:
@@ -720,7 +816,7 @@ def main():
                       screen.blit(textSurf, textRect)
                       pygame.display.update()
                       bank = 0 #reset score in case it is negative
-                      pygame.time.wait(5000)
+                      pygame.time.wait(1000)
                       #pygame.quit()
                       
                       
