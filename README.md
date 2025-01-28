@@ -12,4 +12,4 @@ The Pygame iteration of this slot machine program was designed for a Halloween t
 
 Press the up arrow on keyboard to exit game.
 
-
+Inspired by Jorgon Corp./Jesse Higgins and his treatise entitled '[Slot Machine]' (see pdf)
